@@ -6,7 +6,82 @@
 - Licensed under GNU GPL-3.0 or higher, see the LICENSE file for details.
 ------------------------------------------------------------------------>
     <title>配置编辑器</title>
+    <meta charset="utf-8">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .primary-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .secondary-button {
+            background-color: #2196F3;
+            color: white;
+        }
+        .danger-button {
+            background-color: #f44336;
+            color: white;
+        }
+        .warning-button {
+            background-color: #ff9800;
+            color: white;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        .pdf-banner {
+            background-color: #ff9800;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pdf-banner a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .pdf-banner a:hover {
+            text-decoration: underline;
+        }
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -209,6 +284,127 @@
             75% { transform: translateX(-50%) translateY(5px); }
         }
 
+        /* 添加遮罩层样式 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .overlay-content {
+            background-color: #2c3e50;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 95%;
+            width: 95%;
+            position: relative;
+            max-height: 98vh;  /* 限制最大高度为视窗高度的98% */
+            overflow-y: auto;  /* 如果内容过多则显示滚动条 */
+        }
+
+        .countdown {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #e74c3c;
+        }
+
+        .pdf-container {
+            width: 100%;
+            height: 75vh;  /* 减小PDF容器的高度，确保标题和按钮都能显示 */
+            margin: 0 0 15px 0;
+        }
+
+        .continue-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+            background-color: #2ecc71;
+        }
+
+        .continue-btn.active:hover {
+            transform: scale(1.05);
+        }
+
+        .github-btn {
+            background-color: #24292e;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .github-btn:hover {
+            background-color: #2c974b;
+            transform: scale(1.05);
+        }
+
+        .buttons-container {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .red-title {
+            color: #ff0000;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+            padding: 15px;
+            border-bottom: 2px solid #ff0000;
+        }
+
+        .red-packet-notice {
+            color: #ff4d4f;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .warning-text {
+            color: #e74c3c;
+            font-size: 20px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -541,292 +737,427 @@
             document.getElementById('botButton').addEventListener('click', toggleBot);
         });
 
+        // 强制阅读脚本
+        window.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('overlay')) {
+                const overlay = document.getElementById('overlay');
+                const continueBtn = document.getElementById('continueBtn');
+                const pdfViewer = document.getElementById('pdfViewer');
+                let timeLeft = 10;
 
+                // 尝试设置PDF缩放比例
+                try {
+                    // 等待iframe加载完成
+                    pdfViewer.onload = function() {
+                        try {
+                            // 尝试多种方式设置缩放
+                            if (pdfViewer.contentWindow && pdfViewer.contentWindow.document) {
+                                // 尝试方法1: 直接修改缩放CSS
+                                const viewerContainer = pdfViewer.contentWindow.document.querySelector('.pdfViewer');
+                                if (viewerContainer) {
+                                    viewerContainer.style.transform = 'scale(1.72)';
+                                    viewerContainer.style.transformOrigin = 'top left';
+                                }
+                                
+                                // 尝试方法2: 通过PDF.js的API设置
+                                if (pdfViewer.contentWindow.PDFViewerApplication) {
+                                    pdfViewer.contentWindow.PDFViewerApplication.pdfViewer.currentScale = 1.72;
+                                }
+                            }
+                        } catch (e) {
+                            console.log('PDF缩放设置失败', e);
+                        }
+                    };
+                } catch (e) {
+                    console.log('PDF缩放设置失败', e);
+                }
+
+                // 禁用页面滚动
+                document.body.style.overflow = 'hidden';
+
+                // 倒计时函数
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    continueBtn.textContent = `请等待 ${timeLeft} 秒后继续`;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        continueBtn.textContent = '继续使用程序';
+                        continueBtn.classList.add('active');
+                    }
+                }, 1000);
+
+                // 继续按钮点击事件
+                continueBtn.addEventListener('click', function() {
+                    if (timeLeft <= 0) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+        });
     </script>
 </head>
 <body>
-    <div id="backend-closed-alert" class="backend-closed-alert">
-        后台已关闭，请重新启动
-    </div>
-    
-    <!-- 修改提示框：用于显示保存成功或失败信息 -->
-    <div id="config-alert" class="success-alert" style="display:none;"></div>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h1>配置编辑器</h1>
-        <div>
-            <button id="botButton" class="nav-button">Start Bot</button>
-            <a href="{{ url_for('prompt_list') }}" class="nav-button" id="promptManagement">Prompt管理</a>
-        </div>
-    </div>
-
-    <form method="post">
-        <div class="section">
-            <h2>用户列表</h2>
-            <div class="form-group">
-                <label>微信昵称与对应Prompt配置:</label>
-                <div id="listen-list">
-                    {% for item in config.LISTEN_LIST %}
-                    <div class="entry">
-                        <input type="text" name="nickname" value="{{ item[0] }}" placeholder="微信昵称" required>
-                        <select name="prompt_file" required>
-                            <option value="">-- 选择Prompt文件 --</option>
-                            {% for file in prompt_files %}
-                            <option value="{{ file }}" {% if item[1] == file %}selected{% endif %}>{{ file }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="button" onclick="removeEntry(this)">删除</button>
-                    </div>
-                    {% endfor %}
-                </div>
-                <button type="button" onclick="addEntry()">添加用户</button>
+    {% if pdf_exists %}
+    <!-- 添加遮罩层 -->
+    <div id="overlay" class="overlay">
+        <div class="overlay-content">
+            <h1 class="red-title">抄袭，盈利，国内还能做开源软件吗！！！</h1>
+            <div class="quote-box" style="color: #ff4d4f; margin: 10px 0; padding: 10px; border-left: 4px solid #ff4d4f; background: rgba(255,255,255,0.1);">
+                <p style="margin: 0; font-size: 18px;">
+                    少灰老师："你对男朋友非常好，宁愿自己吃苦也要对男朋友好。"
+                </p>
+                <p style="margin: 5px 0 0 0; font-size: 18px; font-style: italic;">
+                    你说得对，但是API代充五元
+                </p>
+            </div>
+            <iframe src="/view_pdf#zoom=172" class="pdf-container" id="pdfViewer"></iframe>
+            <div class="red-packet-notice">
+                💰 阅读PDF下方领取口令红包
+            </div>
+            <div class="buttons-container">
+                <a href="https://github.com/KouriChat/KouriChat" target="_blank" class="github-btn">
+                    查看苦主项目
+                </a>
+                <button id="continueBtn" class="continue-btn">
+                    请等待 10 秒后继续
+                </button>
             </div>
         </div>
+    </div>
+    {% endif %}
 
-        <div class="section">
-            <h2>Chat 模型配置</h2>
-
-            <!-- API 服务商 -->
-            <div class="form-group">
-                <label>API 服务商: (推荐WeAPIs 注册地址 <a href="https://vg.v1api.cc/register?aff=Rf3h" target="_blank">https://vg.v1api.cc/register?aff=Rf3h</a> 多达60余种模型)</label>
-                <select id="apiProvider" name="temp_DEEPSEEK_BASE_URL">
-                    <option value="https://api.siliconflow.cn/v1/" {% if config.DEEPSEEK_BASE_URL == 'https://api.siliconflow.cn/v1/' %}selected{% endif %}>硅基流动</option>
-                    <option value="https://api.deepseek.com" {% if config.DEEPSEEK_BASE_URL == 'https://api.deepseek.com' %}selected{% endif %}>官方API</option>
-                    <option value="https://vg.v1api.cc/v1" {% if config.DEEPSEEK_BASE_URL == 'https://vg.v1api.cc/v1' %}selected{% endif %}>WeAPIs</option>
-                    <option value="other" {% if config.DEEPSEEK_BASE_URL not in ['https://api.siliconflow.cn/v1/', 'https://api.deepseek.com', 'https://vg.v1api.cc/v1'] %}selected{% endif %}>其它</option>
-                </select>            
-                <input type="text" id="customApiUrl"
-                    placeholder="请输入自定义API地址"
-                    class="custom-input"
-                    {% if config.DEEPSEEK_BASE_URL not in ['https://api.siliconflow.cn/v1/', 'https://api.deepseek.com'] %} 
-                    value="{{ config.DEEPSEEK_BASE_URL }}"
-                    {% endif %}>
-                <input type="hidden" id="finalApiUrl" name="DEEPSEEK_BASE_URL" 
-                    value="{{ config.DEEPSEEK_BASE_URL }}">
+    <div class="container">
+        {% if pdf_exists %}
+        <div class="pdf-banner">
+            <span>📄 抄袭，盈利，国内还能做开源软件吗！！！</span>
+            <a href="/view_pdf" target="_blank" class="button warning-button">
+                查看PDF文档
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="header">
+            <h1>配置编辑器</h1>
+            <div class="header-buttons">
+                <a href="/prompts" class="button secondary-button">Prompt管理</a>
+                <button onclick="startBot()" class="button primary-button">Start Bot</button>
+                <button onclick="stopBot()" class="button danger-button">Stop Bot</button>
             </div>
-
-            <!-- 模型选择 -->
-            <div class="form-group">
-                <label>模型选择: (首次使用推荐DeepSeek V3模型,带*的模型收费较高)</label>
-                <select id="modelSelect" name="temp_MODEL">
-                    <option value="deepseek-ai/DeepSeek-V3" {% if config.MODEL == 'deepseek-ai/DeepSeek-V3' %}selected{% endif %}>硅基DeepSeeek V3模型 （可用免费额度）</option>
-                    <option value="deepseek-ai/DeepSeek-R1" {% if config.MODEL == 'deepseek-ai/DeepSeek-R1' %}selected{% endif %}>硅基DeepSeeek R1模型 （可用免费额度）</option>
-                    <option value="Pro/deepseek-ai/DeepSeek-V3" {% if config.MODEL == 'Pro/deepseek-ai/DeepSeek-V3' %}selected{% endif %}>硅基DeepSeeek V3 Pro模型 （需充值后方可使用）</option>
-                    <option value="Pro/deepseek-ai/DeepSeek-R1" {% if config.MODEL == 'Pro/deepseek-ai/DeepSeek-R1' %}selected{% endif %}>硅基DeepSeeek R1 Pro模型 （需充值后方可使用）</option>
-                    <option value="deepseek-chat" {% if config.MODEL == 'deepseek-chat' %}selected{% endif %}>DeepSeeek官方V3模型</option>
-                    <option value="deepseek-reasoner" {% if config.MODEL == 'deepseek-reasoner' %}selected{% endif %}>DeepSeeek官方R1模型</option>
-                    <option value="gpt-3.5-turbo" {% if config.MODEL == 'gpt-3.5-turbo' %}selected{% endif %}>gpt-3.5-turbo</option>
-                    <option value="gpt-4o" {% if config.MODEL == 'gpt-4o' %}selected{% endif %}>gpt-4o</option>
-                    <option value="gpt-4o-mini" {% if config.MODEL == 'gpt-4o-mini' %}selected{% endif %}>gpt-4o-mini</option>
-                    <option value="gemini-2.0-flash-exp" {% if config.MODEL == 'gemini-2.0-flash-exp' %}selected{% endif %}>gemini-2.0-flash-exp (推荐)</option>
-                    <option value="deepseek-ai/DeepSeek-V3" {% if config.MODEL == 'deepseek-ai/DeepSeek-V3' %}selected{% endif %}>deepseek-ai/DeepSeek-V3 (推荐)</option>
-                    <option value="deepseek-ai/DeepSeek-R1" {% if config.MODEL == 'deepseek-ai/DeepSeek-R1' %}selected{% endif %}>deepseek-ai/DeepSeek-R1</option>
-                    <option value="deepseek-r1-searching" {% if config.MODEL == 'deepseek-r1-searching' %}selected{% endif %}>deepseek-r1-searching 可联网搜索</option>
-                    <option value="claude-3-5-haiku-20241022" {% if config.MODEL == 'claude-3-5-haiku-20241022' %}selected{% endif %}>claude-3-5-haiku-20241022</option>
-                    <option value="chatgpt-4o-latest" {% if config.MODEL == 'chatgpt-4o-latest' %}selected{% endif %}>chatgpt-4o-latest *</option>
-                    <option value="claude-3-5-sonnet-20241022" {% if config.MODEL == 'claude-3-5-sonnet-20241022' %}selected{% endif %}>claude-3-5-sonnet-20241022 *</option>
-                    <option value="claude-3-7-sonnet-20250219" {% if config.MODEL == 'claude-3-7-sonnet-20250219' %}selected{% endif %}>claude-3-7-sonnet-20250219 *</option>
-                    <option value="claude-3-opus-20240229" {% if config.MODEL == 'claude-3-opus-20240229' %}selected{% endif %}>claude-3-opus-20240229 *</option>
-                    <option value="gpt-4" {% if config.MODEL == 'gpt-4' %}selected{% endif %}>gpt-4 *</option>
-                    <option value="gpt-4-turbo" {% if config.MODEL == 'gpt-4-turbo' %}selected{% endif %}>gpt-4-turbo *</option>
-                    <option value="gemini-2.0-pro-exp-02-05" {% if config.MODEL == 'gemini-2.0-pro-exp-02-05' %}selected{% endif %}>gemini-2.0-pro-exp-02-05 *</option>
-                    <option value="grok-3" {% if config.MODEL == 'grok-3' %}selected{% endif %}>grok-3 *</option>
-                    <option value="other" {% if config.MODEL not in ['deepseek-ai/DeepSeek-V3','deepseek-ai/DeepSeek-R1','Pro/deepseek-ai/DeepSeek-V3','Pro/deepseek-ai/DeepSeek-R1','deepseek-chat','deepseek-reasoner','gpt-3.5-turbo','gpt-4o','gpt-4o-mini','gemini-2.0-flash-exp','deepseek-r1-searching','claude-3-5-haiku-20241022','chatgpt-4o-latest','claude-3-5-sonnet-20241022','claude-3-7-sonnet-20250219','claude-3-opus-20240229','gpt-4','gpt-4-turbo','gemini-2.0-pro-exp-02-05','grok-3'] %}selected{% endif %}>其它</option>
-                </select>
-                <input type="text" id="customModel"
-                    placeholder="请输入自定义模型名称"
-                    class="custom-input"
-                    {% if config.MODEL not in ['deepseek-ai/DeepSeek-V3','deepseek-ai/DeepSeek-R1','Pro/deepseek-ai/DeepSeek-V3','Pro/deepseek-ai/DeepSeek-R1','deepseek-chat','deepseek-reasoner'] %} 
-                    value="{{ config.MODEL }}"
-                    {% endif %}>
-                <input type="hidden" id="finalModel" name="MODEL" 
-                    value="{{ config.MODEL }}">
-            </div>
-
-            
-            <div class="form-group">
-                <label>API Key:</label>
-                <input type="text" name="DEEPSEEK_API_KEY" value="{{ config.DEEPSEEK_API_KEY }}">
-            </div>
-
-            <div class="form-group">
-                <label>回复最大Token:</label>
-                <input type="number" step="100" name="MAX_TOKEN" value="{{ config.MAX_TOKEN }}">
-            </div>
-
-            <div class="form-group">
-                <label>温度 (0-2): (如果回复出现乱码请将温度调到1.1或0.7以下)</label>
-                <input type="number" step="0.1" name="TEMPERATURE" value="{{ config.TEMPERATURE }}">
-            </div>
-            
         </div>
         
-       <div class="section">
-            <h2>图片/表情包识别配置</h2>
-            <div class="form-group">
-                <div class="switch-container">
-                    <div class="switch-item">
-                        <label><b>启用图片识别功能</b></label>
-                        <div class="switch">
-                            <label class="switch-label">
-                                <input type="checkbox" name="ENABLE_IMAGE_RECOGNITION" {% if config.ENABLE_IMAGE_RECOGNITION %}checked{% endif %}>
-                                <span class="slider round"></span>
-                            </label>
+        <div id="backend-closed-alert" class="backend-closed-alert">
+            后台已关闭，请重新启动
+        </div>
+        
+        <!-- 修改提示框：用于显示保存成功或失败信息 -->
+        <div id="config-alert" class="success-alert" style="display:none;"></div>
+        
+        <form method="post">
+            <div class="section">
+                <h2>用户列表</h2>
+                <div class="form-group">
+                    <label>微信昵称与对应Prompt配置:</label>
+                    <div id="listen-list">
+                        {% for item in config.LISTEN_LIST %}
+                        <div class="entry">
+                            <input type="text" name="nickname" value="{{ item[0] }}" placeholder="微信昵称" required>
+                            <select name="prompt_file" required>
+                                <option value="">-- 选择Prompt文件 --</option>
+                                {% for file in prompt_files %}
+                                <option value="{{ file }}" {% if item[1] == file %}selected{% endif %}>{{ file }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" onclick="removeEntry(this)">删除</button>
                         </div>
+                        {% endfor %}
                     </div>
-                    <div class="switch-item">
-                        <label><b>启用表情包识别功能</b></label>
-                        <div class="switch">
-                            <label class="switch-label">
-                                <input type="checkbox" name="ENABLE_EMOJI_RECOGNITION" {% if config.ENABLE_EMOJI_RECOGNITION %}checked{% endif %}>
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
+                    <button type="button" onclick="addEntry()">添加用户</button>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>MOONSHOT_API_KEY: (申请网站 <a href="https://platform.moonshot.cn/" target="_blank">https://platform.moonshot.cn/</a> 免费15元额度)</label>
-                <input type="text" name="MOONSHOT_API_KEY" value="{{ config.MOONSHOT_API_KEY }}">
+            <div class="section">
+                <h2>Chat 模型配置</h2>
+
+                <!-- API 服务商 -->
+                <div class="form-group">
+                    <label>API 服务商: (推荐WeAPIs 注册地址 <a href="https://vg.v1api.cc/register?aff=Rf3h" target="_blank">https://vg.v1api.cc/register?aff=Rf3h</a> 多达60余种模型)</label>
+                    <select id="apiProvider" name="temp_DEEPSEEK_BASE_URL">
+                        <option value="https://api.siliconflow.cn/v1/" {% if config.DEEPSEEK_BASE_URL == 'https://api.siliconflow.cn/v1/' %}selected{% endif %}>硅基流动</option>
+                        <option value="https://api.deepseek.com" {% if config.DEEPSEEK_BASE_URL == 'https://api.deepseek.com' %}selected{% endif %}>官方API</option>
+                        <option value="https://vg.v1api.cc/v1" {% if config.DEEPSEEK_BASE_URL == 'https://vg.v1api.cc/v1' %}selected{% endif %}>WeAPIs</option>
+                        <option value="other" {% if config.DEEPSEEK_BASE_URL not in ['https://api.siliconflow.cn/v1/', 'https://api.deepseek.com', 'https://vg.v1api.cc/v1'] %}selected{% endif %}>其它</option>
+                    </select>            
+                    <input type="text" id="customApiUrl"
+                        placeholder="请输入自定义API地址"
+                        class="custom-input"
+                        {% if config.DEEPSEEK_BASE_URL not in ['https://api.siliconflow.cn/v1/', 'https://api.deepseek.com'] %} 
+                        value="{{ config.DEEPSEEK_BASE_URL }}"
+                        {% endif %}>
+                    <input type="hidden" id="finalApiUrl" name="DEEPSEEK_BASE_URL" 
+                        value="{{ config.DEEPSEEK_BASE_URL }}">
+                </div>
+
+                <!-- 模型选择 -->
+                <div class="form-group">
+                    <label>模型选择: (首次使用推荐DeepSeek V3模型,带*的模型收费较高)</label>
+                    <select id="modelSelect" name="temp_MODEL">
+                        <option value="deepseek-ai/DeepSeek-V3" {% if config.MODEL == 'deepseek-ai/DeepSeek-V3' %}selected{% endif %}>硅基DeepSeeek V3模型 （可用免费额度）</option>
+                        <option value="deepseek-ai/DeepSeek-R1" {% if config.MODEL == 'deepseek-ai/DeepSeek-R1' %}selected{% endif %}>硅基DeepSeeek R1模型 （可用免费额度）</option>
+                        <option value="Pro/deepseek-ai/DeepSeek-V3" {% if config.MODEL == 'Pro/deepseek-ai/DeepSeek-V3' %}selected{% endif %}>硅基DeepSeeek V3 Pro模型 （需充值后方可使用）</option>
+                        <option value="Pro/deepseek-ai/DeepSeek-R1" {% if config.MODEL == 'Pro/deepseek-ai/DeepSeek-R1' %}selected{% endif %}>硅基DeepSeeek R1 Pro模型 （需充值后方可使用）</option>
+                        <option value="deepseek-chat" {% if config.MODEL == 'deepseek-chat' %}selected{% endif %}>DeepSeeek官方V3模型</option>
+                        <option value="deepseek-reasoner" {% if config.MODEL == 'deepseek-reasoner' %}selected{% endif %}>DeepSeeek官方R1模型</option>
+                        <option value="gpt-3.5-turbo" {% if config.MODEL == 'gpt-3.5-turbo' %}selected{% endif %}>gpt-3.5-turbo</option>
+                        <option value="gpt-4o" {% if config.MODEL == 'gpt-4o' %}selected{% endif %}>gpt-4o</option>
+                        <option value="gpt-4o-mini" {% if config.MODEL == 'gpt-4o-mini' %}selected{% endif %}>gpt-4o-mini</option>
+                        <option value="gemini-2.0-flash-exp" {% if config.MODEL == 'gemini-2.0-flash-exp' %}selected{% endif %}>gemini-2.0-flash-exp (推荐)</option>
+                        <option value="deepseek-ai/DeepSeek-V3" {% if config.MODEL == 'deepseek-ai/DeepSeek-V3' %}selected{% endif %}>deepseek-ai/DeepSeek-V3 (推荐)</option>
+                        <option value="deepseek-ai/DeepSeek-R1" {% if config.MODEL == 'deepseek-ai/DeepSeek-R1' %}selected{% endif %}>deepseek-ai/DeepSeek-R1</option>
+                        <option value="deepseek-r1-searching" {% if config.MODEL == 'deepseek-r1-searching' %}selected{% endif %}>deepseek-r1-searching 可联网搜索</option>
+                        <option value="claude-3-5-haiku-20241022" {% if config.MODEL == 'claude-3-5-haiku-20241022' %}selected{% endif %}>claude-3-5-haiku-20241022</option>
+                        <option value="chatgpt-4o-latest" {% if config.MODEL == 'chatgpt-4o-latest' %}selected{% endif %}>chatgpt-4o-latest *</option>
+                        <option value="claude-3-5-sonnet-20241022" {% if config.MODEL == 'claude-3-5-sonnet-20241022' %}selected{% endif %}>claude-3-5-sonnet-20241022 *</option>
+                        <option value="claude-3-7-sonnet-20250219" {% if config.MODEL == 'claude-3-7-sonnet-20250219' %}selected{% endif %}>claude-3-7-sonnet-20250219 *</option>
+                        <option value="claude-3-opus-20240229" {% if config.MODEL == 'claude-3-opus-20240229' %}selected{% endif %}>claude-3-opus-20240229 *</option>
+                        <option value="gpt-4" {% if config.MODEL == 'gpt-4' %}selected{% endif %}>gpt-4 *</option>
+                        <option value="gpt-4-turbo" {% if config.MODEL == 'gpt-4-turbo' %}selected{% endif %}>gpt-4-turbo *</option>
+                        <option value="gemini-2.0-pro-exp-02-05" {% if config.MODEL == 'gemini-2.0-pro-exp-02-05' %}selected{% endif %}>gemini-2.0-pro-exp-02-05 *</option>
+                        <option value="grok-3" {% if config.MODEL == 'grok-3' %}selected{% endif %}>grok-3 *</option>
+                        <option value="other" {% if config.MODEL not in ['deepseek-ai/DeepSeek-V3','deepseek-ai/DeepSeek-R1','Pro/deepseek-ai/DeepSeek-V3','Pro/deepseek-ai/DeepSeek-R1','deepseek-chat','deepseek-reasoner','gpt-3.5-turbo','gpt-4o','gpt-4o-mini','gemini-2.0-flash-exp','deepseek-r1-searching','claude-3-5-haiku-20241022','chatgpt-4o-latest','claude-3-5-sonnet-20241022','claude-3-7-sonnet-20250219','claude-3-opus-20240229','gpt-4','gpt-4-turbo','gemini-2.0-pro-exp-02-05','grok-3'] %}selected{% endif %}>其它</option>
+                    </select>
+                    <input type="text" id="customModel"
+                        placeholder="请输入自定义模型名称"
+                        class="custom-input"
+                        {% if config.MODEL not in ['deepseek-ai/DeepSeek-V3','deepseek-ai/DeepSeek-R1','Pro/deepseek-ai/DeepSeek-V3','Pro/deepseek-ai/DeepSeek-R1','deepseek-chat','deepseek-reasoner'] %} 
+                        value="{{ config.MODEL }}"
+                        {% endif %}>
+                    <input type="hidden" id="finalModel" name="MODEL" 
+                        value="{{ config.MODEL }}">
+                </div>
+
+                
+                <div class="form-group">
+                    <label>API Key:</label>
+                    <input type="text" name="DEEPSEEK_API_KEY" value="{{ config.DEEPSEEK_API_KEY }}">
+                </div>
+
+                <div class="form-group">
+                    <label>回复最大Token:</label>
+                    <input type="number" step="100" name="MAX_TOKEN" value="{{ config.MAX_TOKEN }}">
+                </div>
+
+                <div class="form-group">
+                    <label>温度 (0-2): (如果回复出现乱码请将温度调到1.1或0.7以下)</label>
+                    <input type="number" step="0.1" name="TEMPERATURE" value="{{ config.TEMPERATURE }}">
+                </div>
+                
+            </div>
+            
+           <div class="section">
+                <h2>图片/表情包识别配置</h2>
+                <div class="form-group">
+                    <div class="switch-container">
+                        <div class="switch-item">
+                            <label><b>启用图片识别功能</b></label>
+                            <div class="switch">
+                                <label class="switch-label">
+                                    <input type="checkbox" name="ENABLE_IMAGE_RECOGNITION" {% if config.ENABLE_IMAGE_RECOGNITION %}checked{% endif %}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="switch-item">
+                            <label><b>启用表情包识别功能</b></label>
+                            <div class="switch">
+                                <label class="switch-label">
+                                    <input type="checkbox" name="ENABLE_EMOJI_RECOGNITION" {% if config.ENABLE_EMOJI_RECOGNITION %}checked{% endif %}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>MOONSHOT_API_KEY: (申请网站 <a href="https://platform.moonshot.cn/" target="_blank">https://platform.moonshot.cn/</a> 免费15元额度)</label>
+                    <input type="text" name="MOONSHOT_API_KEY" value="{{ config.MOONSHOT_API_KEY }}">
+                </div>
+
+                <div class="form-group">
+                    <label>MOONSHOT_BASE_URL: (一般无需修改)</label>
+                    <input type="text" name="MOONSHOT_BASE_URL" value="{{ config.MOONSHOT_BASE_URL }}">
+                </div>
+
+                <div class="form-group">
+                    <label>识图模型选择:</label>
+                    <select name="MOONSHOT_MODEL">
+                        <option value="moonshot-v1-128k-vision-preview" {% if config.MOONSHOT_MODEL == 'moonshot-v1-128k-vision-preview' %}selected{% endif %}>moonshot-v1-128k-vision-preview</option>
+                        <option value="moonshot-v1-32k-vision-preview" {% if config.MOONSHOT_MODEL == 'moonshot-v1-32k-vision-preview' %}selected{% endif %}>moonshot-v1-32k-vision-preview</option>
+                        <option value="moonshot-v1-8k-vision-preview" {% if config.MOONSHOT_MODEL == 'moonshot-v1-8k-vision-preview' %}selected{% endif %}>moonshot-v1-8k-vision-preview</option>    
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>MOONSHOT温度 (0-1):</label>
+                    <input type="number" step="0.1" name="MOONSHOT_TEMPERATURE" value="{{ config.MOONSHOT_TEMPERATURE }}">
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>MOONSHOT_BASE_URL: (一般无需修改)</label>
-                <input type="text" name="MOONSHOT_BASE_URL" value="{{ config.MOONSHOT_BASE_URL }}">
+            <div class="section">
+                <h2>主动表情包配置</h2>
+                <div class="form-group">
+                    <label><b>启用主动表情包功能</b></label>
+                    <div class="switch">
+                        <label class="switch-label">
+                            <input type="checkbox" name="ENABLE_EMOJI_SENDING" {% if config.ENABLE_EMOJI_SENDING %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>表情包存放目录:</label>
+                    <input type="text" name="EMOJI_DIR" value="{{ config.EMOJI_DIR }}">
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>识图模型选择:</label>
-                <select name="MOONSHOT_MODEL">
-                    <option value="moonshot-v1-128k-vision-preview" {% if config.MOONSHOT_MODEL == 'moonshot-v1-128k-vision-preview' %}selected{% endif %}>moonshot-v1-128k-vision-preview</option>
-                    <option value="moonshot-v1-32k-vision-preview" {% if config.MOONSHOT_MODEL == 'moonshot-v1-32k-vision-preview' %}selected{% endif %}>moonshot-v1-32k-vision-preview</option>
-                    <option value="moonshot-v1-8k-vision-preview" {% if config.MOONSHOT_MODEL == 'moonshot-v1-8k-vision-preview' %}selected{% endif %}>moonshot-v1-8k-vision-preview</option>    
+            <div class="section">
+                <h2>群聊消息接收配置</h2>
+                <label>群聊消息处理模式:</label>
+                <select name="Accept_All_Group_Chat_Messages">
+                    <option value=False {% if config.Accept_All_Group_Chat_Messages == False %}selected{% endif %}>仅当消息中出现@机器人 时作出回应</option>
+                    <option value=True {% if config.Accept_All_Group_Chat_Messages == True %}selected{% endif %}>接收无论任何人的任何消息</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label>MOONSHOT温度 (0-1):</label>
-                <input type="number" step="0.1" name="MOONSHOT_TEMPERATURE" value="{{ config.MOONSHOT_TEMPERATURE }}">
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>主动表情包配置</h2>
-            <div class="form-group">
-                <label><b>启用主动表情包功能</b></label>
-                <div class="switch">
-                    <label class="switch-label">
-                        <input type="checkbox" name="ENABLE_EMOJI_SENDING" {% if config.ENABLE_EMOJI_SENDING %}checked{% endif %}>
-                        <span class="slider round"></span>
-                    </label>
+            <div class="section">
+                <h2>回复间隔配置</h2>
+                <div class="form-group">
+                    <label>消息间隔时间 = 字数 * (平均时间 + 随机时间)</label>
+                    <label>平均打字速度（秒/字）:</label>
+                    <input type="number" step="0.01" name="AVERAGE_TYPING_SPEED" value="{{ config.AVERAGE_TYPING_SPEED }}">
+                    <label>随机打字速度（秒/字）：</label>
+                    <div style="display: flex; gap: 10px;">              
+                        <input type="number" step="0.01" name="RANDOM_TYPING_SPEED_MIN" value="{{ config.RANDOM_TYPING_SPEED_MIN }}">
+                        至
+                        <input type="number" step="0.01" name="RANDOM_TYPING_SPEED_MAX" value="{{ config.RANDOM_TYPING_SPEED_MAX }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>消息队列等待时间（建议5-10秒）:</label>
+                    <input type="number" step="1" name="QUEUE_WAITING_TIME" value="{{ config.QUEUE_WAITING_TIME }}">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>表情包存放目录:</label>
-                <input type="text" name="EMOJI_DIR" value="{{ config.EMOJI_DIR }}">
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>群聊消息接收配置</h2>
-            <label>群聊消息处理模式:</label>
-            <select name="Accept_All_Group_Chat_Messages">
-                <option value=False {% if config.Accept_All_Group_Chat_Messages == False %}selected{% endif %}>仅当消息中出现@机器人 时作出回应</option>
-                <option value=True {% if config.Accept_All_Group_Chat_Messages == True %}selected{% endif %}>接收无论任何人的任何消息</option>
-            </select>
-        </div>
-
-        <div class="section">
-            <h2>回复间隔配置</h2>
-            <div class="form-group">
-                <label>消息间隔时间 = 字数 * (平均时间 + 随机时间)</label>
-                <label>平均打字速度（秒/字）:</label>
-                <input type="number" step="0.01" name="AVERAGE_TYPING_SPEED" value="{{ config.AVERAGE_TYPING_SPEED }}">
-                <label>随机打字速度（秒/字）：</label>
-                <div style="display: flex; gap: 10px;">              
-                    <input type="number" step="0.01" name="RANDOM_TYPING_SPEED_MIN" value="{{ config.RANDOM_TYPING_SPEED_MIN }}">
-                    至
-                    <input type="number" step="0.01" name="RANDOM_TYPING_SPEED_MAX" value="{{ config.RANDOM_TYPING_SPEED_MAX }}">
+            <div class="section">
+                <h2>记忆功能配置</h2>
+                <div class="form-group">
+                    <label><b>启用记忆记录功能</b></label>
+                    <div class="switch">
+                        <label class="switch-label">
+                            <input type="checkbox" name="ENABLE_MEMORY" {% if config.ENABLE_MEMORY %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>消息队列等待时间（建议5-10秒）:</label>
-                <input type="number" step="1" name="QUEUE_WAITING_TIME" value="{{ config.QUEUE_WAITING_TIME }}">
-            </div>
-        </div>
 
-        <div class="section">
-            <h2>记忆功能配置</h2>
-            <div class="form-group">
-                <label><b>启用记忆记录功能</b></label>
-                <div class="switch">
-                    <label class="switch-label">
-                        <input type="checkbox" name="ENABLE_MEMORY" {% if config.ENABLE_MEMORY %}checked{% endif %}>
-                        <span class="slider round"></span>
-                    </label>
+                <div class="form-group">
+                    <label>触发临时记忆总结进Prompt的阈值数量（条）:</label>
+                    <input type="number" step="1" name="MAX_MESSAGE_LOG_ENTRIES" value="{{ config.MAX_MESSAGE_LOG_ENTRIES }}">
                 </div>
+
+                <div class="form-group">
+                    <label>最大记忆数量（条）:</label>
+                    <input type="number" step="1" name="MAX_MEMORY_NUMBER" value="{{ config.MAX_MEMORY_NUMBER }}">
+                </div>
+
+                <div class="form-group">
+                    <label>临时记忆存放目录:</label>
+                    <input type="text" name="MEMORY_TEMP_DIR" value="{{ config.MEMORY_TEMP_DIR }}">
+                </div>
+
             </div>
 
-            <div class="form-group">
-                <label>触发临时记忆总结进Prompt的阈值数量（条）:</label>
-                <input type="number" step="1" name="MAX_MESSAGE_LOG_ENTRIES" value="{{ config.MAX_MESSAGE_LOG_ENTRIES }}">
-            </div>
+            <div class="section">
+                <h2>主动消息配置</h2>
 
-            <div class="form-group">
-                <label>最大记忆数量（条）:</label>
-                <input type="number" step="1" name="MAX_MEMORY_NUMBER" value="{{ config.MAX_MEMORY_NUMBER }}">
-            </div>
+                <div class="form-group">
+                    <label><b>启用主动消息功能</b></label>
+                    <div class="switch">
+                        <label class="switch-label">
+                            <input type="checkbox" name="ENABLE_AUTO_MESSAGE" {% if config.ENABLE_AUTO_MESSAGE %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>临时记忆存放目录:</label>
-                <input type="text" name="MEMORY_TEMP_DIR" value="{{ config.MEMORY_TEMP_DIR }}">
-            </div>
+                <div class="form-group">
+                    <label>主动消息内容(发送给ai获取回复):</label>
+                    <input type="text" name="AUTO_MESSAGE" value="{{ config.AUTO_MESSAGE }}">
+                </div>
+                
+                <div class="form-group">
+                    <label>主动消息触发时间(小时):</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" step="0.01" name="MIN_COUNTDOWN_HOURS" value="{{ config.MIN_COUNTDOWN_HOURS }}">
+                        至
+                        <input type="number" step="0.01" name="MAX_COUNTDOWN_HOURS" value="{{ config.MAX_COUNTDOWN_HOURS }}">
+                    </div>
+                </div>
 
-        </div>
-
-        <div class="section">
-            <h2>主动消息配置</h2>
-
-            <div class="form-group">
-                <label><b>启用主动消息功能</b></label>
-                <div class="switch">
-                    <label class="switch-label">
-                        <input type="checkbox" name="ENABLE_AUTO_MESSAGE" {% if config.ENABLE_AUTO_MESSAGE %}checked{% endif %}>
-                        <span class="slider round"></span>
-                    </label>
+                <div class="form-group">
+                    <label>主动消息安静时间段: (请填00:00-23:59 不要填24:00,并请注意中间的符号为英文冒号)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" name="QUIET_TIME_START" value="{{ config.QUIET_TIME_START }}" placeholder="HH:MM">
+                        至
+                        <input type="text" name="QUIET_TIME_END" value="{{ config.QUIET_TIME_END }}" placeholder="HH:MM">
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>主动消息内容(发送给ai获取回复):</label>
-                <input type="text" name="AUTO_MESSAGE" value="{{ config.AUTO_MESSAGE }}">
+            <div style="margin-top: 20px;">
+                <button type="submit">保存配置</button>
+                <button type="button" onclick="resetForm()">重置表单</button>
             </div>
-            
-            <div class="form-group">
-                <label>主动消息触发时间(小时):</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" step="0.01" name="MIN_COUNTDOWN_HOURS" value="{{ config.MIN_COUNTDOWN_HOURS }}">
-                    至
-                    <input type="number" step="0.01" name="MAX_COUNTDOWN_HOURS" value="{{ config.MAX_COUNTDOWN_HOURS }}">
-                </div>
-            </div>
+        </form>
+    </div>
+    
+    <script>
+        // 其他现有JavaScript代码...
+        
+        function startBot() {
+            fetch('/start_bot', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('启动失败: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('启动失败');
+            });
+        }
 
-            <div class="form-group">
-                <label>主动消息安静时间段: (请填00:00-23:59 不要填24:00,并请注意中间的符号为英文冒号)</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" name="QUIET_TIME_START" value="{{ config.QUIET_TIME_START }}" placeholder="HH:MM">
-                    至
-                    <input type="text" name="QUIET_TIME_END" value="{{ config.QUIET_TIME_END }}" placeholder="HH:MM">
-                </div>
-            </div>
-        </div>
-
-        <div style="margin-top: 20px;">
-            <button type="submit">保存配置</button>
-            <button type="button" onclick="resetForm()">重置表单</button>
-        </div>
-    </form>
+        function stopBot() {
+            fetch('/stop_bot', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('停止失败: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('停止失败');
+            });
+        }
+    </script>
 </body>
 </html>

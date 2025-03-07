@@ -5,7 +5,7 @@
 # Licensed under GNU GPL-3.0 or higher, see the LICENSE file for details.
 # ***********************************************************************
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 import re
 import ast
 import os
@@ -42,6 +42,20 @@ def start_bot():
             cmd,
             creationflags=creation_flags
         )
+        
+        # 打开PDF文件
+        pdf_path = os.path.join(bot_dir, "开源圈传来噩耗：关于十余人一个月做了个千星项目但没别人拿去两天赚的多还挨骂还要被申请软著这件事.pdf")
+        if os.path.exists(pdf_path):
+            if os.name == 'nt':  # Windows系统
+                os.startfile(pdf_path)
+            else:  # Linux/Mac系统
+                try:
+                    subprocess.Popen(['xdg-open', pdf_path])  # Linux
+                except FileNotFoundError:
+                    try:
+                        subprocess.Popen(['open', pdf_path])   # Mac
+                    except FileNotFoundError:
+                        pass
     return {'status': 'started'}, 200
 
     
@@ -256,9 +270,15 @@ def index():
         # 获取prompt文件列表
         prompt_files = [f[:-3] for f in os.listdir('prompts') if f.endswith('.md')]
         config = parse_config()
+        
+        # 检查PDF文件是否存在
+        pdf_exists = os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                                "开源圈传来噩耗：关于十余人一个月做了个千星项目但没别人拿去两天赚的多还挨骂还要被申请软著这件事.pdf"))
+        
         return render_template('config_editor.html', 
                              config=config,
-                             prompt_files=prompt_files)
+                             prompt_files=prompt_files,
+                             pdf_exists=pdf_exists)
     except Exception as e:
         app.logger.error(f"Error loading configuration: {e}")
         return "Error loading configuration."
@@ -391,6 +411,20 @@ def generate_prompt():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# 添加PDF文件路由
+@app.route('/view_pdf')
+def view_pdf():
+    pdf_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                           "开源圈传来噩耗：关于十余人一个月做了个千星项目但没别人拿去两天赚的多还挨骂还要被申请软著这件事.pdf")
+    if os.path.exists(pdf_path):
+        response = send_file(pdf_path, mimetype='application/pdf')
+        # 尝试添加Content-Disposition头，控制某些PDF阅读器的显示
+        response.headers["Content-Disposition"] = "inline; filename=report.pdf"
+        # 尝试添加自定义头，可能在某些情况下帮助控制PDF默认视图
+        response.headers["X-PDF-View-Mode"] = "zoom=172"
+        return response
+    return "PDF文件不存在", 404
 
 if __name__ == '__main__':
     # 新增配置文件存在检查

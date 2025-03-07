@@ -1,5 +1,5 @@
 {
-    "version": "3.9",
-    "last_update": "2025-03-06",
-    "description": "\r\n【建议更新】\r\n修复主动消息时间无法配置为小数的问题\r\n新增WeAPIs接口:支持GPT、Grok、Claude、Gemini、Deepseek R1联网版等多种全新模型;\r\n修复了一些已知的问题;"
-} 
+    "version": "3.10",
+    "last_update": "2025-03-07",
+    "description": "\r\n此版本仅作为警示作用\r\n此版本代码已开源，请各位重视国内开源软件环境。\r\n由于刘某翔（少灰、Iwyxdxl）违反了原项目的原GPLv3协议，\r\n我们目前仍按照GPLv3协议，现已明确对刘某翔进行告知，\r\n刘某翔已暂时失去 GPLv3 所授权的权利。\r\n\r\n刘某翔所分发的软件（您使用的软件）也同步失去权利。\r\n\r\n为了让您规避法律风险，请24小时内停止使用软件，并删除软件副本。\r\n\r\n如刘某翔有意愿恢复权利，请提醒其查看 https://github.com/KouriChat/WeChatBot_WXAUTO_SE/blob/main/Notify.pdf。\r\n\r\n为了确保刘某翔及时收取到告知书，该告知书已通过多渠道同步发送，\r\n包括但不限于刘某翔本人README内留的邮箱、学校官方邮箱、校长信箱，辅导员邮箱等。 "
+}
