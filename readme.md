@@ -1,4 +1,8 @@
 # 说明
+# 少灰老师：你对男朋友非常好，宁愿自己吃苦也要对男朋友好。
+![alt text](Demo_Image/一图流.png)
+
+# 简介
 - 这是一个精简优化版的聊天机器人。通过wxauto收发微信消息，deepseek生成回复消息。
 - 原项目仓库：https://github.com/KouriChat/KouriChat
 - 本项目由iwyxdxl在原项目基础上修改创建。
